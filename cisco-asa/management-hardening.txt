@@ -1,0 +1,27 @@
+! Cisco ASA management-plane hardening (ASA 9.x).
+! Replace 10.10.0.0/24 with your admin network. Never allow ssh/http on "outside".
+
+! 1. SSH and ASDM only from the admin network
+ssh 10.10.0.0 255.255.255.0 inside
+http server enable
+http 10.10.0.0 255.255.255.0 inside
+ssh version 2
+ssh timeout 10
+ssh key-exchange group dh-group14-sha256
+ssl server-version tlsv1.2
+
+! 2. Authenticate management sessions (LOCAL shown; prefer AAA server + LOCAL fallback)
+aaa authentication ssh console LOCAL
+aaa authentication http console LOCAL
+aaa authentication enable console LOCAL
+
+! 3. Send logs somewhere you actually look at them
+logging enable
+logging timestamp
+logging trap informational
+logging host inside 10.10.0.50
+
+! Check what is still exposed:
+!   show running-config ssh
+!   show running-config http
+!   show running-config telnet

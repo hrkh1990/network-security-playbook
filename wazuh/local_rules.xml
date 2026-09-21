@@ -1,0 +1,18 @@
+<!--
+  Wazuh custom rules: alert on admin logins that do not come from the admin network.
+  Put in /var/ossec/etc/rules/local_rules.xml, adjust 10.10.0.0/24, then restart the manager.
+  Test with: /var/ossec/bin/wazuh-logtest
+-->
+<group name="local,admin_access,">
+
+  <!-- 5715 = sshd: authentication success -->
+  <rule id="100100" level="10">
+    <if_sid>5715</if_sid>
+    <srcip>!10.10.0.0/24</srcip>
+    <description>SSH login succeeded from outside the admin network ($(srcip)).</description>
+    <group>authentication_success,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- Success after repeated failures is already covered by built-in rule 40112. -->
+
+</group>

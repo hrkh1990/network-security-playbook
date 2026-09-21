@@ -1,0 +1,19 @@
+# Juniper SRX management-plane hardening (Junos, "set" format).
+# Only allow the services each zone really needs to reach the box itself.
+
+# 1. Internet-facing zone: only what the VPN needs (IKE), no SSH / J-Web
+set security zones security-zone untrust interfaces ge-0/0/0.0 host-inbound-traffic system-services ike
+
+# 2. Management zone: SSH (and J-Web over HTTPS only if you use it)
+set security zones security-zone mgmt interfaces ge-0/0/2.0 host-inbound-traffic system-services ssh
+set security zones security-zone mgmt interfaces ge-0/0/2.0 host-inbound-traffic system-services https
+
+# 3. SSH and login hygiene
+set system services ssh root-login deny
+set system login retry-options tries-before-disconnect 3
+set system login retry-options lockout-period 10
+set system login message "Authorised access only. Activity is logged."
+
+# Verify:
+#   show security zones security-zone untrust
+#   show configuration system services
